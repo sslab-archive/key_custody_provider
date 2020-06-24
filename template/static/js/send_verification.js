@@ -21,7 +21,7 @@ check_verification_button_event = function (code) {
             "&provider_id=" + jsonRes["provider_id"] +
             "&public_key=" + jsonRes["public_key"] +
             "&signed_by_private_key=" + jsonRes["signed_by_private_key"];
-        console.log(r_url)
+        console.log(r_url);
         window.location.href = r_url;
     }).catch(err => {
         console.log(err)

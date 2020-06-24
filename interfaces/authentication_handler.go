@@ -71,24 +71,24 @@ func (au *Authentication) SendVerificationCodeAPI(c *gin.Context) {
 func (au *Authentication) CheckVerificationCodeAPI(c *gin.Context) {
 	// check required params
 	queryParams := c.Request.URL.Query()
-	requiredParams := []string{"email", "code", "partial_key", "partial_key_index", "purpose"}
-	for _, requiredParam := range requiredParams {
-		if _, found := queryParams[requiredParam]; !found {
-			c.JSON(http.StatusBadRequest, "query param required : "+requiredParam)
+	purpose := queryParams.Get("purpose")
+
+	if purpose == "encrypt" {
+		requiredParams := []string{"email", "code", "partial_key", "partial_key_index", "purpose"}
+		for _, requiredParam := range requiredParams {
+			if _, found := queryParams[requiredParam]; !found {
+				c.JSON(http.StatusBadRequest, "query param required : "+requiredParam)
+				return
+			}
+		}
+		email, code := queryParams.Get("email"), queryParams.Get("code")
+		partialKey, partialKeyIndex := queryParams.Get("partial_key"), queryParams.Get("partial_key_index")
+
+		err := au.app.CheckVerificationCode(email, code)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, "err : "+err.Error())
 			return
 		}
-	}
-	email, code := queryParams.Get("email"), queryParams.Get("code")
-	partialKey, partialKeyIndex := queryParams.Get("partial_key"), queryParams.Get("partial_key_index")
-	purpose := queryParams.Get("purpose")
-	err := au.app.CheckVerificationCode(email, code)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, "err : "+err.Error())
-		return
-	}
-
-	if purpose == "encrypt"{
-
 		pubKey, privKey := au.keyService.GetServerPublicKey(), au.keyService.GetServerPrivateKey()
 
 		encryptedPayload, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, &pubKey, []byte(email), nil)
@@ -131,9 +131,9 @@ func (au *Authentication) CheckVerificationCodeAPI(c *gin.Context) {
 			"purpose":               purpose,
 		})
 		return
-	}else if purpose == "decrypt"{
-
-	}else{
+	} else if purpose == "decrypt" {
+		requiredParams := []string{"email", "code"}
+	} else {
 		c.JSON(http.StatusInternalServerError, "err : invalid purpose")
 		return
 	}
