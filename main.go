@@ -27,7 +27,7 @@ import (
 )
 
 func main() {
-	util.InitConfig("config/server.json")
+	util.InitConfig("C:\\Users\\user\\Desktop\\sslab-archive\\key_custody_provider\\config\\server.json")
 	repositories, err := persistence.NewRepositories()
 	if err != nil {
 		panic(err)

@@ -12,7 +12,7 @@ check_verification_button_event = function (code) {
     check_verification(code).then(jsonRes => {
         console.log(jsonRes);
         let redirect_url = getParameterByName('redirect_url');
-        window.location.href = redirect_url + "?credential_type=" + jsonRes["credential_type"] +
+        let r_url = redirect_url + "?purpose=" + jsonRes["purpose"] + "&credential_type=" + jsonRes["credential_type"] +
             "&encrypted_partial_key=" + jsonRes["encrypted_partial_key"] +
             "&encrypted_payload=" + jsonRes["encrypted_payload"] +
             "&partial_key=" + jsonRes["partial_key"] +
@@ -21,6 +21,8 @@ check_verification_button_event = function (code) {
             "&provider_id=" + jsonRes["provider_id"] +
             "&public_key=" + jsonRes["public_key"] +
             "&signed_by_private_key=" + jsonRes["signed_by_private_key"];
+        console.log(r_url)
+        window.location.href = r_url;
     }).catch(err => {
         console.log(err)
     })
@@ -29,7 +31,7 @@ check_verification_button_event = function (code) {
 async function send_verification() {
     let email = document.getElementById('input_email').value;
     const sendVerificationResponse = await fetch(
-        'http://127.0.0.1:8888/authentication/send_code?email=' + email
+        'http://141.223.121.111:8888/authentication/send_code?email=' + email
     );
     return await sendVerificationResponse.json()
 }
@@ -40,8 +42,9 @@ async function check_verification() {
     let code = document.getElementById('input_verification_code').value;
     let partial_key = getParameterByName('partial_key');
     let partial_key_index = getParameterByName('partial_key_index');
+    let purpose = getParameterByName('purpose');
     const sendVerificationResponse = await fetch(
-        'http://127.0.0.1:8888/api/authentication/check?email=' + email + '&code=' + code + '&partial_key=' + partial_key + '&partial_key_index=' + partial_key_index,
+        'http://141.223.121.111:8888/api/authentication/check?purpose='+purpose+'&email=' + email + '&code=' + code + '&partial_key=' + partial_key + '&partial_key_index=' + partial_key_index,
         {
             method: 'POST'
         }
