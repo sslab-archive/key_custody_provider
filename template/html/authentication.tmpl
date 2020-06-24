@@ -1,0 +1,64 @@
+{{ define "authentication.tmpl" }}
+    <html lang="en">
+    <head>
+        <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+        <link href="../static/css/bootstrap-theme.min.css" rel="stylesheet">
+        <meta charset="UTF-8">
+        <title>Authentication</title>
+    </head>
+    <body>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-3"></div>
+            <h1 class="col-xs-6" style="text-align: center;"> 해성쓰 인증 시스템 ㅎㅎㅎ</h1>
+            <div class="col-xs-3"></div>
+        </div>
+        <div class="row">
+            <div class="col-xs-3">
+                <p>asdf</p>
+            </div>
+            <div class="col-xs-3">
+                <p>asdf</p>
+            </div>
+            <div class="col-xs-3">
+                <p>asdf</p>
+            </div>
+            <div class="col-xs-3">
+                <p>asdf</p>
+            </div>
+        </div>
+        <div class="row">
+            <form>
+                <div class="form-group row">
+                    <label class="control-label">Email Address:</label>
+                    <div class="col-xs-12">
+                        <div class="col-xs-10">
+                            <input type="text" class="form-control " id="input_email"/>
+                        </div>
+                        <div class="col-xs-2">
+                            <button type="button" class="btn btn-primary btn-block" onclick="send_verification_button_event()">발송하기</button>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="form-group row">
+                    <label class="control-label">인증번호:</label>
+                    <div class="col-xs-12">
+                        <div class="col-xs-10">
+                            <input type="text" class="form-control " id="input_verification_code"/>
+                        </div>
+                        <div class="col-xs-2">
+                            <button type="button" class="btn btn-primary btn-block" onclick="check_verification_button_event()">인증하기</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+    </body>
+    <script src="../static/js/send_verification.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    </html>
+{{ end }}
