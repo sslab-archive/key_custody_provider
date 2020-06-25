@@ -18,17 +18,17 @@ import (
 	"time"
 )
 
-type Authentication struct {
+type PhoneAuthentication struct {
 	repository repository.AuthenticationRepository
 	authApp    application.AuthenticationApp
 	userApp    application.UserApp
 	keyService service.KeyManagementService
 }
 
-func NewAuthentication(
+func NewPhoneAuthentication(
 	repository repository.AuthenticationRepository, keyService service.KeyManagementService,
-	authApp application.AuthenticationApp,userApp application.UserApp) *Authentication {
-	return &Authentication{
+	authApp application.AuthenticationApp,userApp application.UserApp) *PhoneAuthentication {
+	return &PhoneAuthentication{
 		repository: repository,
 		authApp:    authApp,
 		userApp:    userApp,
@@ -36,7 +36,7 @@ func NewAuthentication(
 	}
 }
 
-func (au *Authentication) StartAuthenticationPage(c *gin.Context) {
+func (au *PhoneAuthentication) StartAuthenticationPage(c *gin.Context) {
 	// check required params
 	//queryParams := c.Request.URL.Query()
 	//requiredParams := []string{"partial_key", "user_public_key", "redirect_url"}
@@ -54,27 +54,27 @@ func (au *Authentication) StartAuthenticationPage(c *gin.Context) {
 	//}
 
 	// process
-	c.HTML(http.StatusOK, "authentication.tmpl", nil)
+	c.HTML(http.StatusOK, "authentication_phone.tmpl", nil)
 }
 
-func (au *Authentication) SendVerificationCodeAPI(c *gin.Context) {
+func (au *PhoneAuthentication) SendVerificationCodeAPI(c *gin.Context) {
 	// check required params
 	queryParams := c.Request.URL.Query()
-	requiredParams := []string{"email",}
+	requiredParams := []string{"phone",}
 	for _, requiredParam := range requiredParams {
 		if _, found := queryParams[requiredParam]; !found {
 			c.JSON(http.StatusBadRequest, "query param required : "+requiredParam)
 			return
 		}
 	}
-	email := queryParams.Get("email")
-	code, err := au.authApp.SendVerificationCode(email)
+	phone := queryParams.Get("phone")
+	code, err := au.authApp.SendVerificationCode(phone)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, "err : "+err.Error())
 		return
 	}
 
-	existedAuthentication, err := au.repository.GetAuthenticationByPayload(email)
+	existedAuthentication, err := au.repository.GetAuthenticationByPayload(phone)
 	if err != nil {
 		au.repository.DeleteAuthentication(existedAuthentication.ID)
 	}
@@ -82,7 +82,7 @@ func (au *Authentication) SendVerificationCodeAPI(c *gin.Context) {
 	authentication := entity.Authentication{
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
-		Payload:    email,
+		Payload:    phone,
 		AuthCode:   code,
 		IsVerified: false,
 	}
@@ -91,21 +91,21 @@ func (au *Authentication) SendVerificationCodeAPI(c *gin.Context) {
 	return
 }
 
-func (au *Authentication) CheckVerificationCodeAPI(c *gin.Context) {
+func (au *PhoneAuthentication) CheckVerificationCodeAPI(c *gin.Context) {
 	// check required params
 	queryParams := c.Request.URL.Query()
 	fmt.Println(queryParams)
 	// check purpose params
 	purpose := queryParams.Get("purpose")
-	email := queryParams.Get("email")
+	phone := queryParams.Get("phone")
 	code := queryParams.Get("code")
-	if purpose == "" || email == "" || code == "" {
-		c.JSON(http.StatusBadRequest, "query param required : "+"purpose/email/code")
+	if purpose == "" || phone == "" || code == "" {
+		c.JSON(http.StatusBadRequest, "query param required : "+"purpose/phone/code")
 		return
 	}
 
 	if purpose == "encrypt" {
-		requiredParams := []string{"email", "code", "user_public_key","partial_key", "partial_key_index", "purpose"}
+		requiredParams := []string{"phone", "code", "user_public_key","partial_key", "partial_key_index", "purpose"}
 		for _, requiredParam := range requiredParams {
 			if _, found := queryParams[requiredParam]; !found {
 				c.JSON(http.StatusBadRequest, "query param required : "+requiredParam)
@@ -113,18 +113,18 @@ func (au *Authentication) CheckVerificationCodeAPI(c *gin.Context) {
 			}
 		}
 
-		email, code := queryParams.Get("email"), queryParams.Get("code")
+		phone, code := queryParams.Get("phone"), queryParams.Get("code")
 		partialKey, partialKeyIndex := queryParams.Get("partial_key"), queryParams.Get("partial_key_index")
 		userPublicKey := queryParams.Get("user_public_key")
 
-		err := au.authApp.CheckVerificationCode(email, code)
+		err := au.authApp.CheckVerificationCode(phone, code)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, "err : "+err.Error())
 			return
 		}
 		pubKey, privKey := au.keyService.GetServerPublicKey(), au.keyService.GetServerPrivateKey()
 
-		encryptedPayload, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, &pubKey, []byte(email), nil)
+		encryptedPayload, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, &pubKey, []byte(phone), nil)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, "err : "+err.Error())
 			return
@@ -140,7 +140,7 @@ func (au *Authentication) CheckVerificationCodeAPI(c *gin.Context) {
 		rawData, _ := json.Marshal(gin.H{
 			"encrypted_payload":     hex.EncodeToString(encryptedPayload),
 			"encrypted_partial_key": hex.EncodeToString(encryptedPartialKey),
-			"credential_type":       "email",
+			"credential_type":       "phone",
 		})
 		h := sha256.New()
 		h.Write(rawData)
@@ -152,18 +152,18 @@ func (au *Authentication) CheckVerificationCodeAPI(c *gin.Context) {
 		}
 
 		intPartialKeyIndex,_ := strconv.ParseUint(partialKeyIndex, 10, 64)
-		err = au.userApp.CreateUser(userPublicKey,partialKey,email,intPartialKeyIndex)
+		err = au.userApp.CreateUser(userPublicKey,partialKey,phone,intPartialKeyIndex)
 		if err != nil{
 			c.JSON(http.StatusInternalServerError, "err : "+err.Error())
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"encrypted_payload":     hex.EncodeToString(encryptedPayload),
-			"payload":               email,
+			"payload":               phone,
 			"encrypted_partial_key": hex.EncodeToString(encryptedPartialKey),
 			"partial_key":           partialKey,
 			"partial_key_index":     partialKeyIndex,
-			"credential_type":       "email",
+			"credential_type":       "phone",
 			"provider_id":           1,
 			"public_key":            pubKey.N.String(),
 			"signed_by_private_key": signData,
@@ -171,21 +171,21 @@ func (au *Authentication) CheckVerificationCodeAPI(c *gin.Context) {
 		})
 		return
 	} else if purpose == "decrypt" {
-		email, code := queryParams.Get("email"), queryParams.Get("code")
-		err := au.authApp.CheckVerificationCode(email, code)
+		phone, code := queryParams.Get("phone"), queryParams.Get("code")
+		err := au.authApp.CheckVerificationCode(phone, code)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, "err : "+err.Error())
 			return
 		}
-		partialKey,partialKeyIdx,err := au.userApp.GetPartialKeyByPayload(email)
+		partialKey,partialKeyIdx,err := au.userApp.GetPartialKeyByPayload(phone)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, "err : "+err.Error())
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"payload":           email,
-			"credential_type":   "email",
+			"payload":           phone,
+			"credential_type":   "phone",
 			"provider_id":       1,
 			"purpose":           purpose,
 			"partial_key":       partialKey,

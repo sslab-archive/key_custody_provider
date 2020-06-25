@@ -7,4 +7,5 @@ type UserRepository interface {
 	GetUserById(uint64) (entity.User, error)
 	GetUserByPubKey(string) (entity.User, error)
 	GetUsers() ([]entity.User, error)
+	DeleteUser(id uint64)
 }

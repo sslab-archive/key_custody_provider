@@ -45,7 +45,7 @@ check_verification_button_event = function (code) {
 async function send_verification() {
     let email = document.getElementById('input_email').value;
     const sendVerificationResponse = await fetch(
-        'http://141.223.121.111:8888/p1/api/authentication/send_code?email=' + email,
+        'http://141.223.121.111:8888/p3/api/authentication/send_code?email=' + email,
         {
             method: 'POST'
         }
@@ -68,7 +68,7 @@ async function check_verification() {
     let user_public_key = getParameterByName('user_public_key');
     console.log("p:"+purpose);
     const sendVerificationResponse = await fetch(
-        'http://141.223.121.111:8888/p1/api/authentication/check?user_public_key='+user_public_key+'&purpose='+purpose+'&email=' + email + '&code=' + code + '&partial_key=' + partial_key + '&partial_key_index=' + partial_key_index,
+        'http://141.223.121.111:8888/p3/api/authentication/check?user_public_key='+user_public_key+'&purpose='+purpose+'&email=' + email + '&code=' + code + '&partial_key=' + partial_key + '&partial_key_index=' + partial_key_index,
         {
             method: 'POST'
         }

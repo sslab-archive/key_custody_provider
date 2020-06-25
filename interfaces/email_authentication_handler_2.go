@@ -18,17 +18,17 @@ import (
 	"time"
 )
 
-type Authentication struct {
+type SecondEmailAuthentication struct {
 	repository repository.AuthenticationRepository
 	authApp    application.AuthenticationApp
 	userApp    application.UserApp
 	keyService service.KeyManagementService
 }
 
-func NewAuthentication(
+func NewSecondEmailAuthentication(
 	repository repository.AuthenticationRepository, keyService service.KeyManagementService,
-	authApp application.AuthenticationApp,userApp application.UserApp) *Authentication {
-	return &Authentication{
+	authApp application.AuthenticationApp,userApp application.UserApp) *SecondEmailAuthentication {
+	return &SecondEmailAuthentication{
 		repository: repository,
 		authApp:    authApp,
 		userApp:    userApp,
@@ -36,7 +36,7 @@ func NewAuthentication(
 	}
 }
 
-func (au *Authentication) StartAuthenticationPage(c *gin.Context) {
+func (au *SecondEmailAuthentication) StartAuthenticationPage(c *gin.Context) {
 	// check required params
 	//queryParams := c.Request.URL.Query()
 	//requiredParams := []string{"partial_key", "user_public_key", "redirect_url"}
@@ -54,10 +54,10 @@ func (au *Authentication) StartAuthenticationPage(c *gin.Context) {
 	//}
 
 	// process
-	c.HTML(http.StatusOK, "authentication.tmpl", nil)
+	c.HTML(http.StatusOK, "mail_authentication_2.tmpl", nil)
 }
 
-func (au *Authentication) SendVerificationCodeAPI(c *gin.Context) {
+func (au *SecondEmailAuthentication) SendVerificationCodeAPI(c *gin.Context) {
 	// check required params
 	queryParams := c.Request.URL.Query()
 	requiredParams := []string{"email",}
@@ -91,7 +91,7 @@ func (au *Authentication) SendVerificationCodeAPI(c *gin.Context) {
 	return
 }
 
-func (au *Authentication) CheckVerificationCodeAPI(c *gin.Context) {
+func (au *SecondEmailAuthentication) CheckVerificationCodeAPI(c *gin.Context) {
 	// check required params
 	queryParams := c.Request.URL.Query()
 	fmt.Println(queryParams)

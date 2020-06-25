@@ -1,12 +1,12 @@
-send_verification_button_event = function (email) {
-    send_verification(email).then(res => {
+send_verification_button_event = function (phone) {
+    send_verification(phone).then(res => {
         let status = res["status"];
         let jsonRes = res["body"];
         if (status> 300){
             alert("ERR: status -" +status+", body : "+jsonRes);
             return
         }else{
-            alert("successfully send verification code to your email")
+            alert("successfully send verification code to your phone")
         }
         console.log(jsonRes)
     }).catch(err => {
@@ -43,9 +43,9 @@ check_verification_button_event = function (code) {
 };
 
 async function send_verification() {
-    let email = document.getElementById('input_email').value;
+    let phone = document.getElementById('input_phone').value;
     const sendVerificationResponse = await fetch(
-        'http://141.223.121.111:8888/p1/api/authentication/send_code?email=' + email,
+        'http://141.223.121.111:8888/p2/api/authentication/send_code?phone=' + phone,
         {
             method: 'POST'
         }
@@ -60,7 +60,7 @@ async function send_verification() {
 
 
 async function check_verification() {
-    let email = document.getElementById('input_email').value;
+    let phone = document.getElementById('input_phone').value;
     let code = document.getElementById('input_verification_code').value;
     let partial_key = getParameterByName('partial_key');
     let partial_key_index = getParameterByName('partial_key_index');
@@ -68,7 +68,7 @@ async function check_verification() {
     let user_public_key = getParameterByName('user_public_key');
     console.log("p:"+purpose);
     const sendVerificationResponse = await fetch(
-        'http://141.223.121.111:8888/p1/api/authentication/check?user_public_key='+user_public_key+'&purpose='+purpose+'&email=' + email + '&code=' + code + '&partial_key=' + partial_key + '&partial_key_index=' + partial_key_index,
+        'http://141.223.121.111:8888/p2/api/authentication/check?user_public_key='+user_public_key+'&purpose='+purpose+'&phone=' + phone + '&code=' + code + '&partial_key=' + partial_key + '&partial_key_index=' + partial_key_index,
         {
             method: 'POST'
         }

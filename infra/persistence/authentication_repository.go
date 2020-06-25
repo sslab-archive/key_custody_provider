@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"errors"
 	"github.com/sslab-archive/key_custody_provider/domain/entity"
 )
 
@@ -9,8 +10,8 @@ type AuthenticationMemoryRepository struct {
 	autoIncreasedId uint64
 }
 
-func (ar *AuthenticationMemoryRepository) DeleteAuthentication(uint64) {
-	panic("implement me")
+func (ar *AuthenticationMemoryRepository) DeleteAuthentication(id uint64) {
+	delete(ar.authentication,id)
 }
 
 func (ar *AuthenticationMemoryRepository) SaveAuthentication(au *entity.Authentication) (*entity.Authentication, error) {
@@ -27,12 +28,20 @@ func (ar *AuthenticationMemoryRepository) SaveAuthentication(au *entity.Authenti
 	return au, nil
 }
 
-func (ar *AuthenticationMemoryRepository) GetAuthenticationById(uint64) (entity.Authentication, error) {
-	panic("implement me")
+func (ar *AuthenticationMemoryRepository) GetAuthenticationById(id uint64) (entity.Authentication, error) {
+	if data, found := ar.authentication[id]; found{
+		return data, nil
+	}
+	return entity.Authentication{},errors.New("해당하는 authentication 을 발견하지 못했습니다.")
 }
 
-func (ar *AuthenticationMemoryRepository) GetAuthenticationByPayload(string) (entity.Authentication, error) {
-	panic("implement me")
+func (ar *AuthenticationMemoryRepository) GetAuthenticationByPayload(payload string) (entity.Authentication, error) {
+	for _,auth := range ar.authentication{
+		if auth.Payload == payload{
+			return auth,nil
+		}
+	}
+	return entity.Authentication{}, errors.New("해당하는 authentication 을 찾지 못했습니다")
 }
 
 func (ar *AuthenticationMemoryRepository) GetAuthenticationByAuthCode(string) (entity.Authentication, error) {

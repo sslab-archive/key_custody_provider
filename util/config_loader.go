@@ -10,8 +10,9 @@ import (
 var configInstance *Config
 
 type Config struct {
-	GmailID string
-	GmailPW string
+	GmailID  string
+	GmailPW  string
+	PhoneAPI string
 }
 
 func InitConfig(path string) {

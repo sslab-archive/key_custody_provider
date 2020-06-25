@@ -8,9 +8,7 @@ import (
 
 func GetRandomString(size int) string {
 	rand.Seed(time.Now().UnixNano())
-	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ" +
-		"abcdefghijklmnopqrstuvwxyzåäö" +
-		"0123456789")
+	chars := []rune("0123456789")
 	var b strings.Builder
 	for i := 0; i < size; i++ {
 		b.WriteRune(chars[rand.Intn(len(chars))])
